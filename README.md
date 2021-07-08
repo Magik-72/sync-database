@@ -1,5 +1,5 @@
 # Description
-Use this package to synchronize your local development MySQL database with a remote one (ed. production).
+Use this package to synchronize your local development MySQL database with a remote one (e.g., production).
 It'll connect through SSH to a remote server, make a dump, download it and import it into your local MySQL database.
 
 # Prerequisites
