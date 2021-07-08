@@ -44,8 +44,8 @@ class SyncDatabaseCommand extends Command
             return 1;
         }
 
-        $database_config = Config::get('sync.database');
-        $ssh_config = Config::get('sync.ssh');
+        $database_config = Config::get('sync-database.database');
+        $ssh_config = Config::get('sync-database.ssh');
 
         if(!isset($ssh_config['timeout'])){
             $ssh_config['timeout'] = 300;
