@@ -12,6 +12,8 @@ class SyncDatabaseProvider extends ServiceProvider
             ]);
         }
 
+        $this->mergeConfigFrom(__DIR__ . '/../config/sync-database.php', 'sync-database');
+
         $this->publishes([
             __DIR__ . '/../config/sync-database.php' => $this->app->basePath() . '/config/sync-database.php',
         ]);

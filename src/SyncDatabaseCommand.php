@@ -56,6 +56,21 @@ class SyncDatabaseCommand extends Command
             $database_config['max_allowed_packet'] = '64M';
         }
 
+        if ($database_config['host'] == '' || $database_config['port'] == '' || $database_config['user'] == '' || $database_config['password'] == '') {
+            $this->error("Missing database configuration.");
+            return 1;
+        }
+
+        if ($ssh_config['host'] == '' || $ssh_config['port'] == '' || $ssh_config['user'] == '' || ($ssh_config['password'] == '' && $ssh_config['key'] == '')) {
+            $this->error("Missing ssh configuration.");
+            return 1;
+        }
+
+        if ($ssh_config['key'] != '' && file_exists($ssh_config['key']) === false) {
+            $this->error("SSH Key not found.");
+            return 1;
+        }
+
         $key = PublicKeyLoader::load(file_get_contents($ssh_config['key']));
         $ssh_client = new SSH2($ssh_config['host'], $ssh_config['port'], $ssh_config['timeout']);
         $sftp_client = new SFTP($ssh_config['host'], $ssh_config['port'], $ssh_config['timeout']);
@@ -70,21 +85,6 @@ class SyncDatabaseCommand extends Command
 
         if ($sftp_client->isConnected() === false || $sftp_client->isAuthenticated() === false) {
             $this->error("SFTP connection cannot be established.");
-            return 1;
-        }
-
-        if ($database_config['host'] == '' || $database_config['port'] == '' || $database_config['user'] == '' || $database_config['password'] == '') {
-            $this->error("Missing database configuration.");
-            return 1;
-        }
-
-        if ($ssh_config['host'] == '' || $ssh_config['port'] == '' || $ssh_config['user'] == '' || ($ssh_config['password'] == '' && $ssh_config['key'] == '')) {
-            $this->error("Missing ssh configuration.");
-            return 1;
-        }
-
-        if ($ssh_config['key'] != '' && file_exists($ssh_config['key']) === false) {
-            $this->error("SSH Key not found.");
             return 1;
         }
 
