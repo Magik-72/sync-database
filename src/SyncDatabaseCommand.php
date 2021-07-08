@@ -2,6 +2,7 @@
 
 namespace Toyi\SyncDatabase;
 
+use ByteUnits\Metric;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
@@ -47,11 +48,11 @@ class SyncDatabaseCommand extends Command
         $database_config = Config::get('sync-database.database');
         $ssh_config = Config::get('sync-database.ssh');
 
-        if(!isset($ssh_config['timeout'])){
+        if (!isset($ssh_config['timeout'])) {
             $ssh_config['timeout'] = 300;
         }
 
-        if(!isset($database_config['max_allowed_packet'])){
+        if (!isset($database_config['max_allowed_packet'])) {
             $database_config['max_allowed_packet'] = '64M';
         }
 
@@ -136,7 +137,20 @@ class SyncDatabaseCommand extends Command
         $ssh_client->exec('gzip ' . $dump_file_remote);
 
         $this->info("Downloading...");
-        $sftp_client->get($dump_file_remote_gz, $dump_file_local_gz);
+        $size = $sftp_client->filesize($dump_file_remote_gz);
+        $size_mb = str_replace('MB', '', Metric::bytes($size)->format('MB'));
+
+        $this->info('Remote file '.$dump_file_remote_gz.' ('.$size_mb.'MB) will be downloaded.');
+
+        $bar = $this->getOutput()->createProgressBar($size_mb);
+        $bar->setOverwrite(true);
+
+        $sftp_client->get($dump_file_remote_gz, $dump_file_local_gz, 0, -1, function ($size) use ($bar) {
+            $bar->setProgress(str_replace('MB', '', Metric::bytes($size)->format('MB')));
+        });
+
+        $bar->finish();
+        $this->getOutput()->newLine();
 
         $ssh_client->exec('rm ' . $dump_file_remote_gz);
         $this->info("Remote dump deleted.");
