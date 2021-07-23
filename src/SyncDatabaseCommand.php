@@ -93,7 +93,7 @@ class SyncDatabaseCommand extends Command
         $tables_no_data_e = array_filter(explode(',', $tables_no_data));
         $tables_no_data_e = array_filter($tables_no_data_e);
 
-        $filename = 'dump.sql';
+        $filename = 'toyi-sync-database-'.md5(uniqid(rand(), true)).'.sql';
         $dump_file_remote = '/tmp/' . $filename;
         $dump_file_local = '/tmp/' . $filename;
         $dump_file_remote_gz = $dump_file_remote . '.gz';
@@ -158,6 +158,7 @@ class SyncDatabaseCommand extends Command
         exec("gzip -d $dump_file_local_gz");
         $this->info("Local dump extracted.");
 
+        DB::connection()->getSchemaBuilder()->dropAllTables();
         $this->info("Importing...");
         $default_config = Config::get('database.connections.' . DB::getDefaultConnection());
         $import_cmd = [];
