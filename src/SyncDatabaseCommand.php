@@ -142,7 +142,7 @@ class SyncDatabaseCommand extends Command
 
         $this->info('Remote file '.$dump_file_remote_gz.' ('.$size_mb.'MB) will be downloaded.');
 
-        $bar = $this->getOutput()->createProgressBar($size_mb);
+        $bar = $this->getOutput()->createProgressBar((float) $size_mb);
         $bar->setOverwrite(true);
 
         $sftp_client->get($dump_file_remote_gz, $dump_file_local_gz, 0, -1, function ($size) use ($bar) {
